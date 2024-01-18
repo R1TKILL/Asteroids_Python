@@ -1,0 +1,68 @@
+import pygame
+
+from pygame.locals import *
+from sys import exit
+
+SCREEN_WIDTH = 400
+SCREEN_HEIGHT = 700
+
+#Estas classes herdando o pygame te oferece facilidades em sprites e objetos para o jogo.
+class Bird(pygame.sprite.Sprite):
+    def __init__(self):
+        #Classes que tem o pygame precisam chamar o construtor do pygame no inicio.
+        pygame.sprite.Sprite.__init__(self)
+
+        #Objetos que terá suas imagens cicladas no update
+        self.images = [pygame.image.load('../FlipBird/assets/sprites/bluebird-upflap.png'),
+                       pygame.image.load('../FlipBird/assets/sprites/bluebird-midflap.png'),
+                       pygame.image.load('../FlipBird/assets/sprites/bluebird-downflap.png')]
+
+        #O contador para alterar.
+        self.current_image = 0
+
+        '''Convert alpha ajuda na melhor interpretação dos bits transparentes em imagens no pygame
+        útil para definir melhor colisões, não contando os bits transparentes, image rect nesse contexto
+        não são variaveis, mas funções do construtor pygame, não alteralos o nome.'''
+
+        #imagem inicial.
+        self.image = pygame.image.load('../FlipBird/assets/sprites/bluebird-upflap.png').convert_alpha()
+        self.rect = self.image.get_rect()
+        # Posição das imagens no rect.
+        self.rect[0] = SCREEN_WIDTH / 2
+        self.rect[1] = SCREEN_HEIGHT / 2
+
+    #Para cada update mudar a imagem.
+    def update(self):
+        #Ao fianl ele pega o resto dessa divisão o fazendo receber o inicio.
+        self.current_image = (self.current_image + 1) % 3
+        #Mudando de fato.
+        self.image = self.images[self.current_image]
+
+
+pygame.init()
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+
+BACKGROUND = pygame.image.load('../FlipBird/assets/sprites/background-day.png')
+BACKGROUND = pygame.transform.scale(BACKGROUND, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+#Grupo de sprites do tipo passaro, ajuda a gerenciar melhor os tipos de sprites pra jogo.
+bird_group = pygame.sprite.Group()
+bird = Bird()
+bird_group.add(bird)
+
+FPS = pygame.time.Clock()
+
+while True:
+    FPS.tick(20)
+
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            exit()
+
+    screen.blit(BACKGROUND, (0, 0))
+
+    bird_group.update()#Para atualizar o que aconteçe entre as imagens na tela.
+    bird_group.draw(screen)#Onde vai desenhar esse grupo.
+
+    pygame.display.update()
